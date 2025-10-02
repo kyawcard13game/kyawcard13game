@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <title>13 Card Online Game</title>
+</head>
+<body>
+  <h1>13 Card Online Game</h1>
+  <input id="room" placeholder="Room ID">
+  <input id="nick" placeholder="Your Name">
+  <button onclick="joinRoom()">Join Room</button>
+
+  <div id="chat"></div>
+  <input id="msg" placeholder="Type message">
+  <button onclick="sendChat()">Send</button>
+
+  <script>
+    let ws;
+    function joinRoom() {
+      const room = document.getElementById("room").value;
+      const nick = document.getElementById("nick").value;
+      ws = new WebSocket("ws://localhost:3000"); // Glitch တင်သွားရင် wss://xxx.glitch.me
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({type: "join", payload:{room, nick, create:true}}));
+      };
+
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if(msg.type==="chat"){
+          document.getElementById("chat").innerHTML += `<p><b>${msg.payload.nick}:</b> ${msg.payload.text}</p>`;
+        }
+      };
+    }
+
+    function sendChat() {
+      const text = document.getElementById("msg").value;
+      ws.send(JSON.stringify({type:"chat", payload:{text}}));
+      document.getElementById("msg").value="";
+    }
+  </script>
+</body>
+</html>
